@@ -24,8 +24,8 @@ class RegisterRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string'],
-            'company_name' => ['required', 'string'],
-            'mobile' => ['required', 'string', 'unique:merchants'],
+            // 'company_name' => ['required', 'string'],
+            'phone' => ['required', 'string', 'unique:users'],
             'password' => ['required', 'confirmed', Password::defaults()],
         ];
     }

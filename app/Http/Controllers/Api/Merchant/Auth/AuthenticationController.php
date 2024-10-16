@@ -25,14 +25,15 @@ class AuthenticationController extends Controller
     {
         $data = $request->validated();
         $data['password'] = Hash::make($data['password']);
-        $merchant = Merchant::create($data);
-        MerchantInfo::create([
-            'merchant_id'   => $merchant->getKey(),
-            'company_name' => $request->company_name
-        ]);
+        $data['genre'] = 'M';
+        $merchant = User::create($data);
+        // MerchantInfo::create([
+        //     'merchant_id'   => $merchant->getKey(),
+        //     'company_name' => $request->company_name
+        // ]);
 
         return $this->success([
-            'merchant' => $merchant,
+            'user' => $merchant,
             'token' => $merchant->createToken('API Token of ' . $merchant->name)->plainTextToken,
         ]);
     }

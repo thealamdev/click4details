@@ -18,6 +18,7 @@ use App\Http\Livewire\FlatManager;
 use App\Http\Livewire\RentalService\RentalServiceComponent;
 use App\Http\Livewire\RentalService\Category\RentalCarComponent;
 use App\Http\Livewire\RentalService\Category\RentCarDetailComponent;
+use App\Models\Vehicle;
 
 Route::name('home.')->group(function () {
     Route::get('/', HomeManager::class)->name('index');
@@ -25,7 +26,7 @@ Route::name('home.')->group(function () {
     Route::get('/flat', VehicleManager::class)->name('flat');
     Route::get('/land', PropertyManager::class)->name('land');
     Route::get('/accessory', AccessoryManager::class)->name('accessory');
-    Route::get('flat',FlatManager::class)->name('flat');
+    Route::get('flat', FlatManager::class)->name('flat');
     Route::get('/search', Search::class)->name('search');
 
     Route::get('/vehicles/{slug}/details', DetailManager::class)->name('detail');
@@ -79,4 +80,11 @@ Route::prefix('merchant')->name('merchant.')->group(function () {
 Route::prefix('customer-care')->name('customer-care.')->group(function () {
     require __DIR__ . '/customer-care/auth.php';
     require __DIR__ . '/customer-care/base.php';
+});
+
+
+Route::get('/', function () {
+    return Vehicle::query()
+        ->with(relations: 'entities')
+        ->first();
 });

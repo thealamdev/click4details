@@ -8,16 +8,20 @@ use App\Models\Available;
 use App\Models\Statement;
 use App\Enums\Publication;
 use Illuminate\Support\Str;
+use App\Models\Availability;
 use Illuminate\Http\Request;
 use App\Models\VehicleFeatur;
 use App\Traits\HttpResponses;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\EntityProduct;
+use App\Http\Resources\VehicleResource;
+use App\Http\Resources\EntityProductResource;
+use App\Http\Resources\VehicleProductResource;
 use App\Http\Requests\Package\Vehicle\StoreVehicleRequest;
 use App\Http\Requests\Package\Vehicle\UpdateVehicleRequest;
 use App\Http\Handlers\Resolvers\Package\Vehicle\VehicleHandler;
-use App\Http\Resources\VehicleProductResource;
-use App\Http\Resources\VehicleResource;
-use App\Models\Availability;
 
 class VehicleController extends Controller
 {
@@ -61,16 +65,59 @@ class VehicleController extends Controller
 
     public function features(Request $request, Vehicle $vehicle): array|object
     {
-        $features = VehicleFeatur::query()
-            ->where('vehicle_id', $vehicle->id)
-            ->with(['feature' => function ($query) {
-                $query->select('id', 'title');
-            }])->with(['detail' => function ($query) {
-                $query->select('id', 'title');
-            }])
+        // $features = VehicleFeatur::query()
+        //     ->where('vehicle_id', $vehicle->id)
+        //     ->with(['feature' => function ($query) {
+        //         $query->select('id', 'title');
+        //     }])->with(['detail' => function ($query) {
+        //         $query->select('id', 'title');
+        //     }])
+        //     ->get();
 
+        $entity_product = Vehicle::query()
+            ->where('id', $vehicle->id)
+            ->with(relations: 'entities')
             ->get();
-        return $this->success($features, '', 200);
+
+        return $this->success($entity_product, '', 200);
+
+        // $entity_product_resource = EntityProductResource::collection($entity_product);
+    }
+
+    /**
+     * method for searching vehicles.
+     * @param Request $request
+     * @return array|object
+     */
+    public function search(Request $request): array|object
+    {
+        $vehicles = Vehicle::query()->select('id', 'merchant_id', 'color_id', 'slug', 'brand_id', 'edition_id', 'condition_id', 'transmission_id', 'engine_id', 'fuel_id', 'skeleton_id', 'available_id', 'mileage_id', 'grade_id', 'purchase_price', 'fixed_price', 'price', 'mileages', 'engines', 'code', 'registration', 'carmodel_id', 'manufacture', 'engine_number', 'chassis_number')->where('merchant_id', $request->user()->id)->where('slug', 'LIKE', '%' . Str::slug($request->search) . '%')
+            ->orWhere('code', 'LIKE', '%' . Str::slug($request->search) . '%')
+            ->with(['vehicle_feature' => function ($query) {
+                $query->select('vehicle_id', 'featur_id', 'detail_id', 'edition_id')
+                    ->with(['feature' => function ($query) {
+                        $query->select('id', 'title');
+                    }])->with(['detail' => function ($query) {
+                        $query->select('id', 'title');
+                    }]);
+            }])
+            ->with('image', fn($query) => $query->select(['id', 'image_id', 'name', 'path']))
+            ->with('merchant', fn($query) => $query->select(['id', 'name']))
+            ->with('translate', fn($query) => $query->select(['translate_id', 'title']))
+            ->with('brand', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
+            ->with('color', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
+            ->with('grade', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
+            ->with('carmodel', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
+            ->with('edition', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
+            ->with('condition', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
+            ->with('transmission', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
+            ->with('engine', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
+            ->with('fuel', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
+            ->with('skeleton', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
+            ->with('available', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
+            ->with('mileage', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
+            ->paginate(20);
+        return $this->success($vehicles, '', 200);
     }
 
     /**
@@ -136,7 +183,7 @@ class VehicleController extends Controller
             'price' => $request->price,
         ]);
 
-        return $this->success('', 'Purchase price update successfull', 200);
+        return $this->success('', 'Purchase price update successfully', 200);
     }
 
     /**
@@ -201,42 +248,6 @@ class VehicleController extends Controller
         // $route = route('home.detail', $product->slug);
         $route = route('merchant.view', ['product' => $product->slug]);
         return $this->success($vehicles, $route, 200);
-    }
-
-    /**
-     * method for searching vehicles.
-     * @param Request $request
-     * @return array|object
-     */
-    public function search(Request $request): array|object
-    {
-        $vehicles = Vehicle::query()->select('id', 'merchant_id', 'color_id', 'slug', 'brand_id', 'edition_id', 'condition_id', 'transmission_id', 'engine_id', 'fuel_id', 'skeleton_id', 'available_id', 'mileage_id', 'grade_id', 'purchase_price', 'fixed_price', 'price', 'mileages', 'engines', 'code', 'registration', 'carmodel_id', 'manufacture', 'engine_number', 'chassis_number')->where('merchant_id', $request->user()->id)->where('slug', 'LIKE', '%' . Str::slug($request->search) . '%')
-            ->orWhere('code', 'LIKE', '%' . Str::slug($request->search) . '%')
-            ->with(['vehicle_feature' => function ($query) {
-                $query->select('vehicle_id', 'featur_id', 'detail_id', 'edition_id')
-                    ->with(['feature' => function ($query) {
-                        $query->select('id', 'title');
-                    }])->with(['detail' => function ($query) {
-                        $query->select('id', 'title');
-                    }]);
-            }])
-            ->with('image', fn($query) => $query->select(['id', 'image_id', 'name', 'path']))
-            ->with('merchant', fn($query) => $query->select(['id', 'name']))
-            ->with('translate', fn($query) => $query->select(['translate_id', 'title']))
-            ->with('brand', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
-            ->with('color', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
-            ->with('grade', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
-            ->with('carmodel', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
-            ->with('edition', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
-            ->with('condition', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
-            ->with('transmission', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
-            ->with('engine', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
-            ->with('fuel', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
-            ->with('skeleton', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
-            ->with('available', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
-            ->with('mileage', fn($query) => $query->with('translate', fn($query) => $query->select('translate_id', 'title'))->select(['id', 'slug']))
-            ->paginate(20);
-        return $this->success($vehicles, '', 200);
     }
 
     /**

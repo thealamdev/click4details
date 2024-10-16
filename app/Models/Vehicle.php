@@ -226,12 +226,21 @@ class Vehicle extends Model
     }
 
     /**
+     * Get entity_product associate with the vehicle
+     * @return BelongsToMany
+     */
+    public function entities(): BelongsToMany
+    {
+        return $this->belongsToMany(related: Entity::class, table: EntityProduct::class, foreignPivotKey: 'product_id', relatedPivotKey: 'entity_id');
+    }
+
+    /**
      * Get statement associate with vehicle
      * @return HasOne
      */
     public function statement(): HasOne
     {
-        return $this->hasOne(Statement::class, 'product_id', 'id');
+        return $this->hasOne(Statement::class, foreignKey: 'product_id', localKey: 'id');
     }
 
     /**
@@ -240,6 +249,6 @@ class Vehicle extends Model
      */
     public function price(): HasOne
     {
-        return $this->hasOne(Price::class, 'product_id', 'id');
+        return $this->hasOne(related: Price::class, foreignKey: 'product_id', localKey: 'id');
     }
 }

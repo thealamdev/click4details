@@ -84,62 +84,10 @@ class HomeManager extends Component
             ->with('fuel')
             ->with('grade')
             ->with('condition')
-            ->with('available')
+            ->with('availability')
+            ->with('image')
             ->limit(10)->get();
-        dd($this->vehicles);
-        
-        $expensiveVehicles = Vehicle::query()
-            ->with(['merchant' => function ($q) {
-                $q->where('status', 1)->where('merchant_type', 'partner');
-            }])
-            ->with('brand.translate')
-            ->with('edition.translate')
-            ->with('fuel.translate')
-            ->with('grade.translate')
-            ->with('mileage.translate')
-            ->with('condition.translate')
-            ->with('available.translate')
-            ->with('image')
-            ->with('translate')
-            ->where('priority', '>', '1')
-            ->orderBy('priority', 'desc')
-            ->get();
 
-        $cheaperVehicles = Vehicle::query()
-            ->with(['merchant' => function ($q) {
-                $q->where('status', 1)->where('merchant_type', 'partner');
-            }])
-            ->with('brand.translate')
-            ->with('edition.translate')
-            ->with('fuel.translate')
-            ->with('grade.translate')
-            ->with('mileage.translate')
-            ->with('condition.translate')
-            ->with('available.translate')
-            ->with('image')
-            ->with('translate')
-            ->where('priority', '<=', '1')
-            ->orderBy('priority', 'desc')
-            ->get();
-
-        $allVehicles = $expensiveVehicles->concat($cheaperVehicles);
-
-        $allVehicles = $allVehicles->filter(function ($vehicle) {
-            return $vehicle->merchant && $vehicle->merchant->status == '1' && $vehicle->merchant->merchant_type === 'partner';
-        });
-
-        $currentPage = Paginator::resolveCurrentPage('page');
-
-        $chunkedVehicles = $allVehicles->forPage($currentPage, $this->limitPerPage);
-
-        $this->vehicles = new LengthAwarePaginator(
-            $chunkedVehicles,
-            $allVehicles->count(),
-            $this->limitPerPage,
-            $currentPage
-        );
-
-        $this->translate = session()->get(Session::TRANSLATION->toString()) ?? app()->getLocale();
         return view('livewire.home-manager', ['vehicles' => $this->vehicles]);
     }
 

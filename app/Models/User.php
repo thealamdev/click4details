@@ -18,7 +18,7 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasApiTokens;
     use HasFactory;
     use Notifiable;
-    // use HasUlids;
+    use HasUlids;
 
     /**
      * The attributes that define table name
@@ -30,7 +30,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * The attributes that are mass assignable
      * @var string[]
      */
-    protected $fillable = ['name', 'email', 'password', 'role'];
+    protected $fillable = ['name', 'email', 'password', 'role', 'phone', 'genre'];
 
     /**
      * The attributes that should be hidden for serialization
