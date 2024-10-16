@@ -1,0 +1,26 @@
+[
+    {
+        "en": "Automatic",
+        "bn": "অটোমেটিক"
+    },
+    {
+        "en": "Manual",
+        "bn": "ম্যানুয়াল"
+    },
+    {
+        "en": "Continuously Variable",
+        "bn": "কন্টিনুয়াসলি ভ্যারিয়েবল"
+    },
+    {
+        "en": "Semi-automatic",
+        "bn": "সেমি-অটোমেটিক"
+    },
+    {
+        "en": "Tiptronic",
+        "bn": "টিপট্রনিক"
+    },
+    {
+        "en": "Dual Clutch",
+        "bn": "ডুয়াল ক্লাচ"
+    }
+]

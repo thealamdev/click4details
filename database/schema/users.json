@@ -1,0 +1,20 @@
+[
+    {
+        "name": "Pilot Kabir",
+        "email": "pilotkabir@gmail.com",
+        "password": "abc@123456",
+        "role": "Admin"
+    },
+    {
+        "name": "Tanvir Ahmed",
+        "email": "tanvirahmed@gmail.com",
+        "password": "abc@123456",
+        "role": "Admin"
+    },
+    {
+        "name": "md-aamroni",
+        "email": "info.kazironi@gmail.com",
+        "password": "roni.0504",
+        "role": "Admin"
+    }
+]
