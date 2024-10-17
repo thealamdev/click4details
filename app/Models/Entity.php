@@ -16,4 +16,9 @@ class Entity extends Model
      * @var string
      */
     protected $table = 'vhc_entities';
+
+    public function feature()
+    {
+        return $this->hasOne(Featur::class,'id','feature_id');
+    }
 }

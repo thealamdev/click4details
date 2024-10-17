@@ -16,4 +16,6 @@ class EntityProduct extends Model
      * @var string
      */
     protected $table = 'vhc_entity_product';
+
+    
 }

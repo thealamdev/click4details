@@ -12,8 +12,24 @@ class EntityProductResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
+    public function toArray(Request $request)
     {
-        return [];
+        $response = [];
+        foreach ($this->entities as $entity) {
+            $response[] = [
+                'id' => $this->id,
+                'slug' => $this->slug,
+                'edition_id' => $this->edition_id,
+                'feature' => [
+                    'id'    => $entity->feature->id,
+                    'title' => $entity->feature->title,
+                ],
+                'detail' => [
+                    'id'    => $entity->id,
+                    'title' => $entity->title,
+                ]
+            ];
+        }
+        return $response;
     }
 }
