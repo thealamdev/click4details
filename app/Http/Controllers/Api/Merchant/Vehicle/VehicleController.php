@@ -77,11 +77,30 @@ class VehicleController extends Controller
         $entity_product = Vehicle::query()
             ->with('entities', fn($query) => $query->with('feature'))
             ->where('id', $vehicle->id)
-            ->get();
+            ->first();
 
-        $entity_product_resource = EntityProductResource::collection($entity_product);
-        return $this->success($entity_product_resource, '', 200);
-        // return $this->success($entity_product, '', 200);
+        $response = [];
+        foreach ($entity_product->entities as $entity) {
+            $response[] = [
+                'id' => $entity->id,
+                'slug' => $entity->slug,
+                'edition_id' => $entity->edition_id,
+                'feature' => [
+                    'id'    => $entity->feature->id,
+                    'title' => $entity->feature->title,
+                ],
+                'detail' => [
+                    'id'    => $entity->id,
+                    'title' => $entity->title,
+                ]
+            ];
+        }
+
+        return $this->success($response, '', 200);
+
+        // $entity_product_resource = EntityProductResource::collection($entity_product);
+        // return $this->success($entity_product_resource, '', 200);
+        // // return $this->success($entity_product, '', 200);
     }
 
     /**
